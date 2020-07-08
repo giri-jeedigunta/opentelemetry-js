@@ -2,10 +2,24 @@
 
 const tracer = require('./tracer')(('example-grpc-server'));
 // eslint-disable-next-line import/order
+const path              = require('path');
+const fs                = require('fs');
+
+const protoLoader             = require("@grpc/proto-loader");
 const grpc = require('grpc');
 
-const messages = require('./helloworld_pb');
-const services = require('./helloworld_grpc_pb');
+// const messages = require('./helloworld_pb');
+// const services = require('./helloworld_grpc_pb');
+
+const serviceDef = grpc.loadPackageDefinition(
+  protoLoader.loadSync(path.join(__dirname, '/messages.proto'),{
+      keepCase: true,
+      longs: String,
+      enums: Number,
+      defaults: true,
+      oneofs: true
+    })
+);
 
 const PORT = 50051;
 
@@ -13,7 +27,7 @@ const PORT = 50051;
 function startServer() {
   // Creates a server
   const server = new grpc.Server();
-  server.addService(services.GreeterService, { sayHello });
+  server.addService(serviceDef.test.TestService.service, { sayHello });
   server.bind(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure());
   console.log(`binding server on 0.0.0.0:${PORT}`);
   server.start();
@@ -29,9 +43,9 @@ function sayHello(call, callback) {
     attributes: { key: 'value' },
   });
   span.addEvent(`invoking sayHello() to ${call.request.getName()}`);
-  const reply = new messages.HelloReply();
-  reply.setMessage(`Hello ${call.request.getName()}`);
-  callback(null, reply);
+  //const reply = new messages.HelloReply();
+  //reply.setMessage(`Hello ${call.request.getName()}`);
+  callback(null, {'success':1});
   span.end();
 }
 

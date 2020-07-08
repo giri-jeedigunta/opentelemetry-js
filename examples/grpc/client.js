@@ -1,10 +1,23 @@
 'use strict';
 
-const tracer = require('./tracer')('example-grpc-client');
+const tracer = require('./tracer-client')('example-grpc-client');
+const path              = require('path');
+const fs                = require('fs');
 // eslint-disable-next-line import/order
+const protoLoader   = require("@grpc/proto-loader");
 const grpc = require('grpc');
-const messages = require('./helloworld_pb');
-const services = require('./helloworld_grpc_pb');
+// const messages = require('./helloworld_pb');
+// const services = require('./helloworld_grpc_pb');
+
+const serviceDef = grpc.loadPackageDefinition(
+  protoLoader.loadSync(path.join(__dirname, '/messages.proto'),{
+      keepCase: true,
+      longs: String,
+      enums: Number,
+      defaults: true,
+      oneofs: true
+    })
+);
 
 const PORT = 50051;
 
@@ -16,23 +29,23 @@ function main() {
   const span = tracer.startSpan('client.js:main()');
   tracer.withSpan(span, () => {
     console.log('Client traceId ', span.context().traceId);
-    const client = new services.GreeterClient(
+    const client = new serviceDef.test.TestService(
       `localhost:${PORT}`,
       grpc.credentials.createInsecure(),
     );
-    const request = new messages.HelloRequest();
-    let user;
-    if (process.argv.length >= 3) {
-      // eslint-disable-next-line prefer-destructuring
-      user = process.argv[2];
-    } else {
-      user = 'world';
-    }
-    request.setName(user);
-    client.sayHello(request, (err, response) => {
+    // const request = new messages.HelloRequest();
+    // let user;
+    // if (process.argv.length >= 3) {
+    //   // eslint-disable-next-line prefer-destructuring
+    //   user = process.argv[2];
+    // } else {
+    //   user = 'world';
+    // }
+    // request.setName(user);
+    client.sayHello({}, (err, response) => {
       span.end();
       if (err) throw err;
-      console.log('Greeting:', response.getMessage());
+      console.log('Greeting:', response);
     });
   });
 

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "test/messages";
+option java_package = "com.lowes.test.messages";
+
+package test;
+
+message Ok {
+    int32 success = 1;
+}
+
+service TestService {
+    rpc sayHello ( Ok ) returns (Ok);
+}
