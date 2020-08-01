@@ -42,7 +42,7 @@ function sayHello(call, callback) {
     kind: 1, // server
     attributes: { key: 'value' },
   });
-  span.addEvent(`invoking sayHello() to ${call.request.getName()}`);
+  span.addEvent(`invoking sayHello()`);
   //const reply = new messages.HelloReply();
   //reply.setMessage(`Hello ${call.request.getName()}`);
   callback(null, {'success':1});
